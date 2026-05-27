@@ -1,7 +1,7 @@
 import { register } from './actions'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import Link from 'next/link'
 
 export default function RegisterPage() {
@@ -30,7 +30,7 @@ export default function RegisterPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">Registrarse</Button>
+            <SubmitButton className="w-full" loadingText="Creando cuenta...">Registrarse</SubmitButton>
             <p className="text-sm text-center text-muted-foreground">
               ¿Ya tenés cuenta?{' '}
               <Link href="/login" className="text-primary hover:underline">

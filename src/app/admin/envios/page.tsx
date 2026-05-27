@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createZone, deleteZone } from './actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Input } from '@/components/ui/input'
 import { ARGENTINA_PROVINCES } from '@/lib/provinces'
 import { Pencil, Truck } from 'lucide-react'
@@ -52,10 +53,10 @@ export default async function AdminEnviosPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" loadingText="Creando...">
               <Truck className="h-4 w-4 mr-2" />
               Crear zona
-            </Button>
+            </SubmitButton>
           </form>
         </div>
 

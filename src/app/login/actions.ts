@@ -17,8 +17,12 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    const params = returnTo ? `?error=Credenciales invalidas&returnTo=${encodeURIComponent(returnTo)}` : '?error=Credenciales invalidas'
-    redirect(`/login${params}`)
+    const msg = error.message.toLowerCase().includes('email not confirmed')
+      ? 'Verificá tu email antes de ingresar. Revisá tu bandeja de entrada.'
+      : 'Email o contraseña incorrectos.'
+    const params = new URLSearchParams({ error: msg })
+    if (returnTo) params.set('returnTo', returnTo)
+    redirect(`/login?${params}`)
   }
 
   const { data: profile } = await supabase

@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   Menu, X, LayoutDashboard, Package, Tag,
   ShoppingBag, TrendingUp, Truck, Wallet,
-  MapPin, Percent, ExternalLink, LogOut,
+  MapPin, Percent, ExternalLink, LogOut, Loader2,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { logout } from '@/app/profile/actions'
@@ -26,6 +27,20 @@ const FINANCE_LINKS = [
   { href: '/admin/compras', label: 'Compras', icon: Truck },
   { href: '/admin/caja',    label: 'Caja',    icon: Wallet },
 ]
+
+function LogoutSubmit() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full disabled:opacity-60"
+    >
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+      {pending ? 'Saliendo...' : 'Cerrar sesión'}
+    </button>
+  )
+}
 
 export function AdminMobileBar({ lowStockCount = 0 }: { lowStockCount?: number }) {
   const [open, setOpen] = useState(false)
@@ -138,13 +153,7 @@ export function AdminMobileBar({ lowStockCount = 0 }: { lowStockCount?: number }
                 <ThemeToggle />
               </div>
               <form action={logout} className="w-full">
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Cerrar sesión
-                </button>
+                <LogoutSubmit />
               </form>
             </div>
           </aside>

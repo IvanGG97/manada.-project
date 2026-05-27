@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { createCategory, deleteCategory } from './actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Trash2 } from 'lucide-react'
@@ -29,7 +30,7 @@ export default async function AdminCategoriasPage() {
               <label className="text-sm font-medium">Descripción</label>
               <Input name="description" placeholder="Opcional" />
             </div>
-            <Button type="submit">Crear categoría</Button>
+            <SubmitButton loadingText="Creando...">Crear categoría</SubmitButton>
           </form>
         </div>
 

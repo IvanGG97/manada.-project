@@ -1,11 +1,11 @@
 import { login } from './actions'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import Link from 'next/link'
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string; error?: string }> }) {
-  const { returnTo, error } = await searchParams
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const { returnTo } = await searchParams
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -19,11 +19,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                {error}
-              </div>
-            )}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">Email</label>
               <Input id="email" name="email" type="email" required />
@@ -34,7 +29,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">Ingresar</Button>
+            <SubmitButton className="w-full" loadingText="Ingresando...">Ingresar</SubmitButton>
             <p className="text-sm text-center text-muted-foreground">
               ¿No tenés cuenta?{' '}
               <Link href="/register" className="text-primary hover:underline">

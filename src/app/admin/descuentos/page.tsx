@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createDiscountCode, deleteDiscountCode, toggleDiscountCode } from './actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Input } from '@/components/ui/input'
 import { Tag, Percent, DollarSign, Infinity } from 'lucide-react'
 
@@ -77,10 +78,10 @@ export default async function AdminDescuentosPage() {
               <Input name="expires_at" type="date" />
             </div>
 
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" loadingText="Creando...">
               <Tag className="h-4 w-4 mr-2" />
               Crear código
-            </Button>
+            </SubmitButton>
           </form>
         </div>
 
@@ -148,9 +149,9 @@ export default async function AdminDescuentosPage() {
 
                       <div className="flex flex-col gap-2 shrink-0">
                         <form action={toggleAction}>
-                          <Button type="submit" variant="outline" size="sm" className="w-full text-xs">
+                          <SubmitButton variant="outline" size="sm" className="w-full text-xs">
                             {code.is_active ? 'Desactivar' : 'Activar'}
-                          </Button>
+                          </SubmitButton>
                         </form>
                         <ConfirmDialog
                           title="Eliminar código"

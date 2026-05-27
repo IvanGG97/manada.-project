@@ -1,7 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { ImageManager, type ExistingImage } from './ImageManager'
 
 interface Category { id: string; name: string }
@@ -97,7 +97,7 @@ export function ProductForm({ action, categories, submitLabel, productId, existi
         </label>
       </div>
 
-      <Button type="submit">{submitLabel}</Button>
+      <SubmitButton loadingText="Guardando...">{submitLabel}</SubmitButton>
     </form>
   )
 }

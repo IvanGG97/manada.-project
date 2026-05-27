@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { updateZone } from '../../actions'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Input } from '@/components/ui/input'
 import { ARGENTINA_PROVINCES } from '@/lib/provinces'
 import { notFound } from 'next/navigation'
@@ -72,7 +73,7 @@ export default async function EditarZonaPage(props: { params: Promise<{ id: stri
             </div>
           </div>
 
-          <Button type="submit" className="w-full">Guardar cambios</Button>
+          <SubmitButton className="w-full" loadingText="Guardando...">Guardar cambios</SubmitButton>
         </form>
       </div>
     </div>

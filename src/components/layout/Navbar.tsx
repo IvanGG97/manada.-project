@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { User, LayoutDashboard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { getCategories } from '@/lib/supabase/api'
 import { CartIcon } from '@/components/cart/CartIcon'
 import { NavMenu } from './NavMenu'
@@ -56,7 +57,7 @@ export async function Navbar() {
             </Link>
             <ThemeToggle />
             <form action={logout}>
-              <Button variant="outline" size="sm" type="submit">Cerrar sesión</Button>
+              <SubmitButton variant="outline" size="sm" loadingText="Saliendo...">Cerrar sesión</SubmitButton>
             </form>
           </div>
         </div>

@@ -11,7 +11,7 @@ export async function register(formData: FormData) {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -22,7 +22,15 @@ export async function register(formData: FormData) {
   })
 
   if (error) {
-    redirect('/register?error=Error al crear cuenta')
+    const msg = error.message.toLowerCase().includes('already registered')
+      ? 'Ya existe una cuenta con ese email. Iniciá sesión.'
+      : 'Error al crear la cuenta. Intentá de nuevo.'
+    redirect(`/register?error=${encodeURIComponent(msg)}`)
+  }
+
+  // Si no hay sesión, Supabase requiere confirmación de email
+  if (!data.session) {
+    redirect('/login?success=' + encodeURIComponent('Te enviamos un correo de verificación. Revisá tu bandeja de entrada antes de ingresar.'))
   }
 
   revalidatePath('/', 'layout')
