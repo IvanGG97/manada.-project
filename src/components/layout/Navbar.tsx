@@ -27,7 +27,7 @@ export async function Navbar() {
 
   if (isAdmin) {
     return (
-      <nav className="border-b bg-background sticky top-0 z-10 shadow-sm">
+      <nav className="hidden md:block border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="flex items-center gap-2.5 shrink-0">
@@ -46,7 +46,7 @@ export async function Navbar() {
           </div>
           <div className="flex items-center gap-3">
             {firstName && (
-              <span className="text-sm text-muted-foreground hidden sm:block">Hola, {firstName}</span>
+              <span className="text-sm text-muted-foreground">{firstName}</span>
             )}
             <Link href="/admin">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -68,7 +68,7 @@ export async function Navbar() {
 
   return (
     <nav className="border-b bg-background sticky top-0 z-10 shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -82,7 +82,7 @@ export async function Navbar() {
           <span className="text-xl font-bold tracking-tight hidden sm:block">MaNaDa</span>
         </Link>
 
-        {/* Desktop nav + mobile hamburger */}
+        {/* Desktop links + hamburger mobile (NavMenu es ahora un único div) */}
         <NavMenu categories={categories} />
 
         {/* Acciones del usuario */}

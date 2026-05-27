@@ -33,7 +33,7 @@ export function NavMenu({ categories }: NavMenuProps) {
   }, [])
 
   return (
-    <>
+    <div className="flex items-center">
       {/* ── Desktop ── */}
       <div className="hidden md:flex items-center gap-5">
         <Link
@@ -84,12 +84,10 @@ export function NavMenu({ categories }: NavMenuProps) {
       {/* ── Mobile drawer ── */}
       {mobileOpen && (
         <>
-          {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/40 z-40 md:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          {/* Panel */}
           <div className="fixed top-0 left-0 h-full w-72 max-w-[85vw] bg-background z-50 flex flex-col shadow-xl md:hidden animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between px-5 py-4 border-b">
               <Link href="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
@@ -133,6 +131,6 @@ export function NavMenu({ categories }: NavMenuProps) {
           </div>
         </>
       )}
-    </>
+    </div>
   )
 }

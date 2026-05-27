@@ -1,7 +1,5 @@
 import { getProducts, getCategories } from '@/lib/supabase/api'
 import Link from 'next/link'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
 export default async function ProductosPage(props: {
@@ -77,37 +75,34 @@ export default async function ProductosPage(props: {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {products.map(product => (
-                <Card key={product.id} className="overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  <div className="aspect-square bg-muted relative">
-                    {product.image_url ? (
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary/50">
-                        Sin imagen
-                      </div>
-                    )}
+                <Link key={product.id} href={`/productos/${product.slug}`} className="group block">
+                  <div className="rounded-xl border border-border bg-background overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                    <div className="aspect-square bg-muted relative overflow-hidden">
+                      {product.image_url ? (
+                        <Image
+                          src={product.image_url}
+                          alt={product.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary/50">
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 md:p-4 flex-1">
+                      {product.categories && (
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">
+                          {product.categories.name}
+                        </span>
+                      )}
+                      <h3 className="font-semibold text-sm md:text-base line-clamp-2 leading-tight mb-1.5">{product.name}</h3>
+                      <p className="font-bold text-base md:text-lg">${product.price.toLocaleString('es-AR')}</p>
+                    </div>
                   </div>
-                  <CardContent className="p-3 md:p-4 flex-1">
-                    {product.categories && (
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">
-                        {product.categories.name}
-                      </span>
-                    )}
-                    <h3 className="font-semibold text-sm md:text-base line-clamp-2 leading-tight mb-1.5">{product.name}</h3>
-                    <p className="font-bold text-base md:text-lg">${product.price.toLocaleString('es-AR')}</p>
-                  </CardContent>
-                  <CardFooter className="p-3 md:p-4 pt-0">
-                    <Link href={`/productos/${product.slug}`} className="w-full">
-                      <Button className="w-full text-sm" size="sm">Ver detalle</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
+                </Link>
               ))}
             </div>
           )}

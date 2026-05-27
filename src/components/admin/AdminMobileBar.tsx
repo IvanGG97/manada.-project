@@ -7,8 +7,10 @@ import { usePathname } from 'next/navigation'
 import {
   Menu, X, LayoutDashboard, Package, Tag,
   ShoppingBag, TrendingUp, Truck, Wallet,
-  MapPin, Percent, ExternalLink,
+  MapPin, Percent, ExternalLink, LogOut,
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { logout } from '@/app/profile/actions'
 
 const STORE_LINKS = [
   { href: '/admin',            label: 'Dashboard',   icon: LayoutDashboard },
@@ -123,15 +125,27 @@ export function AdminMobileBar({ lowStockCount = 0 }: { lowStockCount?: number }
               </div>
             </nav>
 
-            <div className="p-4 border-t">
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Ver tienda
-              </Link>
+            <div className="p-4 border-t space-y-2">
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Ver tienda
+                </Link>
+                <ThemeToggle />
+              </div>
+              <form action={logout} className="w-full">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar sesión
+                </button>
+              </form>
             </div>
           </aside>
         </>

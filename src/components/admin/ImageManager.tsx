@@ -47,34 +47,47 @@ function DeleteImageButton({
 
 export function ImageManager({ productId, existingImages = [] }: ImageManagerProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [previews, setPreviews] = useState<{ file: File; objectUrl: string }[]>([])
+  const [previews, setPreviews] = useState<{ file: File; dataUrl: string }[]>([])
   const [dragging, setDragging] = useState(false)
 
   function syncInput(files: File[]) {
     if (!inputRef.current) return
-    const dt = new DataTransfer()
-    files.forEach((f) => dt.items.add(f))
-    inputRef.current.files = dt.files
+    try {
+      const dt = new DataTransfer()
+      files.forEach((f) => dt.items.add(f))
+      inputRef.current.files = dt.files
+    } catch {
+      // DataTransfer no disponible en este browser; se usa el input original
+    }
   }
 
   function addFiles(incoming: FileList | null) {
     if (!incoming) return
-    const next = [
-      ...previews,
-      ...Array.from(incoming).map((file) => ({
-        file,
-        objectUrl: URL.createObjectURL(file),
-      })),
-    ]
-    setPreviews(next)
-    syncInput(next.map((p) => p.file))
+    const files = Array.from(incoming)
+    Promise.all(
+      files.map(
+        (file) =>
+          new Promise<{ file: File; dataUrl: string }>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (e) => resolve({ file, dataUrl: e.target?.result as string })
+            reader.readAsDataURL(file)
+          })
+      )
+    ).then((loaded) => {
+      setPreviews((prev) => {
+        const next = [...prev, ...loaded]
+        syncInput(next.map((p) => p.file))
+        return next
+      })
+    })
   }
 
   function removePreview(index: number) {
-    const next = previews.filter((_, i) => i !== index)
-    URL.revokeObjectURL(previews[index].objectUrl)
-    setPreviews(next)
-    syncInput(next.map((p) => p.file))
+    setPreviews((prev) => {
+      const next = prev.filter((_, i) => i !== index)
+      syncInput(next.map((p) => p.file))
+      return next
+    })
   }
 
   const hasImages = existingImages.length > 0 || previews.length > 0
@@ -106,7 +119,7 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
           {previews.map((p, i) => (
             <div key={i} className="relative aspect-square group rounded-md overflow-hidden border-2 border-dashed border-primary/40 bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.objectUrl} alt="" className="w-full h-full object-cover" />
+              <img src={p.dataUrl} alt="" className="w-full h-full object-cover" />
               <span className="absolute bottom-0 left-0 right-0 text-center text-[10px] bg-primary/70 text-white py-0.5">
                 Por subir
               </span>
