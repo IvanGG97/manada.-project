@@ -113,13 +113,12 @@ export async function createPreference(formData: FormData, cartItems: CartItem[]
   try {
     const { resend, FROM_EMAIL } = await import('@/lib/resend')
     const { OrderConfirmationEmail } = await import('@/emails/OrderConfirmation')
+    const { renderToStaticMarkup } = await import('react-dom/server')
+    const { createElement } = await import('react')
     const { data: profile } = await supabase.from('profiles').select('first_name').eq('id', user.id).single()
     const productsSubtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: user.email!,
-      subject: `✅ Pedido confirmado #${order.id.slice(-8).toUpperCase()} — MaNaDa`,
-      react: OrderConfirmationEmail({
+    const html = renderToStaticMarkup(
+      createElement(OrderConfirmationEmail, {
         orderId: order.id,
         firstName: profile?.first_name ?? null,
         items: cartItems.map(i => ({ name: i.name, quantity: i.quantity, unit_price: i.price })),
@@ -130,7 +129,13 @@ export async function createPreference(formData: FormData, cartItems: CartItem[]
         total: totalAmount,
         shippingAddress,
         province,
-      }),
+      })
+    )
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: user.email!,
+      subject: `✅ Pedido confirmado #${order.id.slice(-8).toUpperCase()} — MaNaDa`,
+      html,
     })
   } catch (emailError) {
     console.error('Error sending confirmation email:', emailError)
@@ -141,13 +146,11 @@ export async function createPreference(formData: FormData, cartItems: CartItem[]
   const preference = new Preference(client)
 
   // 6. Generate MP Preference
-  let appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  
-  // Asegurarnos de que la URL tenga el protocolo correcto
+  let appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').trim()
+
   if (!appUrl.startsWith('http://') && !appUrl.startsWith('https://')) {
     appUrl = `https://${appUrl}`
   }
-  // Quitar la barra diagonal final si la tiene para evitar URLs como https://dominio.com//checkout
   if (appUrl.endsWith('/')) {
     appUrl = appUrl.slice(0, -1)
   }
