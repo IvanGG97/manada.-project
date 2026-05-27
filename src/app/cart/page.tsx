@@ -36,54 +36,66 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Tu Carrito</h1>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">Tu Carrito</h1>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1 space-y-4">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 space-y-3">
           {items.map((item) => (
             <Card key={item.id}>
-              <CardContent className="p-4 flex gap-4 items-center">
-                <div className="relative w-20 h-20 bg-muted rounded overflow-hidden shrink-0">
-                  {item.image_url ? (
-                    <Image src={item.image_url} alt={item.name} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground bg-secondary">Sin imagen</div>
-                  )}
+              <CardContent className="p-3 md:p-4">
+                <div className="flex gap-3 items-start">
+                  <div className="relative w-16 h-16 md:w-20 md:h-20 bg-muted rounded-lg overflow-hidden shrink-0">
+                    {item.image_url ? (
+                      <Image src={item.image_url} alt={item.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground bg-secondary">Sin imagen</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-sm md:text-base leading-tight line-clamp-2">{item.name}</h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-bold text-sm md:text-base mt-0.5">${item.price.toLocaleString('es-AR')}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="w-7 text-center font-medium text-sm">{item.quantity}</span>
+                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ${(item.price * item.quantity).toLocaleString('es-AR')}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="font-bold">${item.price}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-medium">{item.quantity}</span>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeItem(item.id)}>
-                  <Trash2 className="h-5 w-5" />
-                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <div className="w-full lg:w-80 shrink-0">
-          <Card className="sticky top-24">
-            <CardContent className="p-6">
+          <Card className="lg:sticky lg:top-24">
+            <CardContent className="p-5 md:p-6">
               <h2 className="text-xl font-bold mb-4">Resumen de compra</h2>
               <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal</span>
-                  <span>${getTotal()}</span>
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} artículo{items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''})</span>
+                  <span>${getTotal().toLocaleString('es-AR')}</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg pt-4 border-t">
+                <div className="flex justify-between font-bold text-lg pt-3 border-t">
                   <span>Total</span>
-                  <span>${getTotal()}</span>
+                  <span>${getTotal().toLocaleString('es-AR')}</span>
                 </div>
               </div>
               <Link href="/checkout">

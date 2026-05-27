@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ChevronDown, X, Menu } from 'lucide-react'
 
@@ -91,7 +92,10 @@ export function NavMenu({ categories }: NavMenuProps) {
           {/* Panel */}
           <div className="fixed top-0 left-0 h-full w-72 max-w-[85vw] bg-background z-50 flex flex-col shadow-xl md:hidden animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between px-5 py-4 border-b">
-              <span className="text-xl font-bold tracking-tighter">MANADA</span>
+              <Link href="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+                <Image src="/Logo.jpeg" alt="MaNaDa" width={30} height={30} className="rounded-lg object-cover" />
+                <span className="text-lg font-bold tracking-tight">MaNaDa</span>
+              </Link>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted transition-colors"

@@ -95,15 +95,15 @@ export default async function AdminProductosPage(props: {
         <ProductFilters categories={categories ?? []} />
       </Suspense>
 
-      <div className="bg-background rounded-lg border overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-background rounded-lg border overflow-hidden overflow-x-auto">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="border-b bg-muted/50">
               <th className="text-left p-3 font-medium">Producto</th>
-              <th className="text-left p-3 font-medium">Categoría</th>
+              <th className="text-left p-3 font-medium hidden md:table-cell">Categoría</th>
               <th className="text-right p-3 font-medium">Precio</th>
               <th className="text-right p-3 font-medium">Stock</th>
-              <th className="text-center p-3 font-medium">Estado</th>
+              <th className="text-center p-3 font-medium hidden sm:table-cell">Estado</th>
               <th className="text-right p-3 font-medium">Acciones</th>
             </tr>
           </thead>
@@ -115,17 +115,20 @@ export default async function AdminProductosPage(props: {
                 <tr key={product.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
+                      <div className="relative w-9 h-9 rounded bg-muted overflow-hidden shrink-0">
                         {product.image_url ? (
                           <Image src={product.image_url} alt={product.name} fill className="object-cover" sizes="40px" />
                         ) : (
                           <div className="w-full h-full bg-secondary" />
                         )}
                       </div>
-                      <p className="font-medium leading-tight">{product.name}</p>
+                      <div className="min-w-0">
+                        <p className="font-medium leading-tight truncate max-w-[140px] md:max-w-none">{product.name}</p>
+                        <p className="text-xs text-muted-foreground md:hidden">{product.categories?.name ?? ''}</p>
+                      </div>
                     </div>
                   </td>
-                  <td className="p-3 text-muted-foreground">{product.categories?.name ?? '—'}</td>
+                  <td className="p-3 text-muted-foreground hidden md:table-cell">{product.categories?.name ?? '—'}</td>
                   <td className="p-3 text-right font-medium">${product.price.toLocaleString('es-AR')}</td>
                   <td className="p-3 text-right">
                     <span className={`font-medium ${product.stock === 0 ? 'text-destructive' : isLowStock ? 'text-amber-600' : ''}`}>
@@ -133,7 +136,7 @@ export default async function AdminProductosPage(props: {
                     </span>
                     {isLowStock && <span className="text-xs text-amber-500 ml-1">↓{product.stock_minimo}</span>}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 hidden sm:table-cell">
                     <div className="flex justify-center gap-1.5 flex-wrap">
                       {product.is_active
                         ? <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">Activo</span>
@@ -147,8 +150,11 @@ export default async function AdminProductosPage(props: {
                   <td className="p-3">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/admin/productos/${product.id}/editar`}>
-                        <Button variant="outline" size="sm" className="gap-1.5">
+                        <Button variant="outline" size="sm" className="gap-1.5 hidden sm:flex">
                           <Pencil className="h-3.5 w-3.5" />Editar
+                        </Button>
+                        <Button variant="outline" size="icon" className="h-8 w-8 sm:hidden">
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
                       </Link>
                       <ConfirmDialog
@@ -161,7 +167,7 @@ export default async function AdminProductosPage(props: {
                         variant={product.is_active ? 'destructive' : 'default'}
                       >
                         <Button type="button" variant="ghost" size="sm"
-                          className={product.is_active ? 'text-muted-foreground' : 'text-green-600'}>
+                          className={product.is_active ? 'text-muted-foreground text-xs' : 'text-green-600 text-xs'}>
                           {product.is_active ? 'Desactivar' : 'Activar'}
                         </Button>
                       </ConfirmDialog>

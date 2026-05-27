@@ -61,7 +61,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ lowStockCount = 0 }: AdminSidebarProps) {
   return (
-    <aside className="w-56 border-r bg-background flex flex-col shrink-0">
+    <aside className="hidden md:flex w-56 border-r bg-background flex-col shrink-0">
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
           <Image

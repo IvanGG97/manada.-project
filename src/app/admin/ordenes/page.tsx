@@ -96,14 +96,14 @@ export default async function AdminOrdenesPage(props: {
               </div>
               <div className="divide-y">
                 {order.order_items?.map((item: any) => (
-                  <div key={item.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="text-muted-foreground w-6 text-center font-medium">{item.quantity}×</span>
-                      <span className="font-medium">{item.products?.name ?? 'Producto eliminado'}</span>
+                  <div key={item.id} className="flex items-center justify-between px-4 py-2.5 text-sm gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-muted-foreground shrink-0 font-medium">{item.quantity}×</span>
+                      <span className="font-medium truncate">{item.products?.name ?? 'Producto eliminado'}</span>
                     </div>
-                    <div className="flex items-center gap-6 text-muted-foreground">
-                      <span>${Number(item.unit_price).toLocaleString('es-AR')} c/u</span>
-                      <span className="font-semibold text-foreground w-24 text-right">
+                    <div className="flex items-center gap-2 shrink-0 text-muted-foreground text-xs">
+                      <span className="hidden sm:inline">${Number(item.unit_price).toLocaleString('es-AR')} c/u</span>
+                      <span className="font-semibold text-foreground">
                         ${(item.quantity * item.unit_price).toLocaleString('es-AR')}
                       </span>
                     </div>
