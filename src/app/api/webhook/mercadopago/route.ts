@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // MP sends notifications with type "payment" when a payment is created/updated
     if (body.type !== 'payment' || !body.data?.id) {
       return NextResponse.json({ received: true })
     }
@@ -38,6 +37,7 @@ export async function POST(request: NextRequest) {
     const newStatus = MP_STATUS_MAP[payment.status ?? ''] ?? 'pending'
 
     const supabase = createAdminClient()
+
     const { error } = await supabase
       .from('orders')
       .update({
@@ -50,6 +50,33 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Supabase update error:', error)
       return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
+    }
+
+    // Registrar en ventas_presenciales cuando el pago es aprobado (idempotente)
+    if (newStatus === 'paid') {
+      const ventaRef = `mp_order:${orderId}`
+      const { count } = await supabase
+        .from('ventas_presenciales')
+        .select('id', { count: 'exact', head: true })
+        .eq('notas', ventaRef)
+
+      if (!count || count === 0) {
+        const { data: order } = await supabase
+          .from('orders')
+          .select('total_amount, created_at')
+          .eq('id', orderId)
+          .single()
+
+        if (order) {
+          await supabase.from('ventas_presenciales').insert({
+            descripcion: `Venta online #${orderId.slice(-8).toUpperCase()}`,
+            monto: order.total_amount,
+            metodo_pago: 'mercadopago',
+            fecha: order.created_at,
+            notas: ventaRef,
+          })
+        }
+      }
     }
 
     return NextResponse.json({ received: true })

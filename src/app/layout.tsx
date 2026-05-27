@@ -40,7 +40,7 @@ export default function RootLayout({
           }}
         />
         <Navbar />
-        <main className="flex-1 pb-16 md:pb-0">
+        <main className="flex-1 pb-16 md:pb-0 flex flex-col">
           {children}
         </main>
         <BottomNav />

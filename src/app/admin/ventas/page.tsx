@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 const METODO_LABEL: Record<string, string> = {
   efectivo: 'Efectivo',
   transferencia: 'Transferencia',
+  mercadopago: 'MercadoPago',
 }
 
 const today = new Date().toISOString().split('T')[0]
@@ -56,7 +57,7 @@ export default async function AdminVentasPage(props: {
                 { key: 'descripcion', type: 'text', label: 'Descripción', placeholder: 'Buscar...' },
                 {
                   key: 'metodo', type: 'select', label: 'Método',
-                  options: [{ value: 'efectivo', label: 'Efectivo' }, { value: 'transferencia', label: 'Transferencia' }],
+                  options: [{ value: 'efectivo', label: 'Efectivo' }, { value: 'transferencia', label: 'Transferencia' }, { value: 'mercadopago', label: 'MercadoPago' }],
                 },
                 { key: 'desde', type: 'date', label: 'Desde' },
                 { key: 'hasta', type: 'date', label: 'Hasta' },
@@ -83,11 +84,13 @@ export default async function AdminVentasPage(props: {
                     <td className="p-3">
                       <p className="font-medium">{v.descripcion}</p>
                       {v.products?.name && <p className="text-xs text-blue-600">📦 {v.products.name} × {v.cantidad}</p>}
-                      {v.notas && <p className="text-xs text-muted-foreground">{v.notas}</p>}
+                      {v.notas && !v.notas.startsWith('mp_order:') && <p className="text-xs text-muted-foreground">{v.notas}</p>}
                     </td>
                     <td className="p-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        v.metodo_pago === 'efectivo' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        v.metodo_pago === 'efectivo' ? 'bg-green-100 text-green-800'
+                        : v.metodo_pago === 'mercadopago' ? 'bg-sky-100 text-sky-800'
+                        : 'bg-blue-100 text-blue-800'
                       }`}>
                         {METODO_LABEL[v.metodo_pago] ?? v.metodo_pago}
                       </span>

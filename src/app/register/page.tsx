@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex-1 flex items-center justify-center p-4 py-12">
       <Card className="w-full max-w-md">
         <form action={register}>
           <CardHeader>

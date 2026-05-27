@@ -5,10 +5,22 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+const NON_REVERTIBLE = new Set(['paid', 'preparing', 'shipped', 'delivered'])
+
 export async function updateOrderStatus(formData: FormData) {
   const supabase = await createClient()
   const id = formData.get('id') as string
   const status = formData.get('status') as string
+
+  const { data: current } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', id)
+    .single()
+
+  if (current && NON_REVERTIBLE.has(current.status) && status === 'pending') {
+    redirect('/admin/ordenes?error=No se puede volver a pendiente una vez que el pago fue confirmado')
+  }
 
   const { error } = await supabase
     .from('orders')
@@ -33,17 +45,22 @@ export async function updateOrderStatus(formData: FormData) {
         if (email) {
           const { resend, FROM_EMAIL } = await import('@/lib/resend')
           const { OrderShippedEmail } = await import('@/emails/OrderShipped')
+          const { renderToStaticMarkup } = await import('react-dom/server')
+          const { createElement } = await import('react')
           const profile = order.profiles as unknown as { first_name: string | null } | null
-          await resend.emails.send({
-            from: FROM_EMAIL,
-            to: email,
-            subject: `🚚 Tu pedido #${order.id.slice(-8).toUpperCase()} está en camino — MaNaDa`,
-            react: OrderShippedEmail({
+          const html = renderToStaticMarkup(
+            createElement(OrderShippedEmail, {
               orderId: order.id,
               firstName: profile?.first_name ?? null,
               shippingAddress: order.shipping_address ?? '',
               province: order.province ?? '',
-            }),
+            })
+          )
+          await resend.emails.send({
+            from: FROM_EMAIL,
+            to: email,
+            subject: `🚚 Tu pedido #${order.id.slice(-8).toUpperCase()} está en camino — MaNaDa`,
+            html,
           })
         }
       }

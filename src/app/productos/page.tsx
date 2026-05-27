@@ -73,7 +73,7 @@ export default async function ProductosPage(props: {
               <p className="text-muted-foreground text-lg">No se encontraron productos en esta categoría.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
               {products.map(product => (
                 <Link key={product.id} href={`/productos/${product.slug}`} className="group block">
                   <div className="rounded-xl border border-border bg-background overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">

@@ -47,7 +47,7 @@ export default async function ProductDetailPage(props: {
     : []
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       {isAdmin && !product.is_active && (
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           <span className="font-semibold">Vista previa</span>

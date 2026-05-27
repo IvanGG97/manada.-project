@@ -1,12 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
-import { Banknote, ArrowUpCircle, ArrowDownCircle, Smartphone, AlertTriangle } from 'lucide-react'
+import { Banknote, ArrowUpCircle, Smartphone, AlertTriangle } from 'lucide-react'
 import { FilterBar } from '@/components/admin/FilterBar'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Input } from '@/components/ui/input'
+import { crearMovimientoCaja } from './actions'
 import { Suspense } from 'react'
 
 const METODO_LABEL: Record<string, string> = {
   efectivo: 'Efectivo',
   transferencia: 'Transferencia',
   financiada: 'Financiada',
+  mercadopago: 'MercadoPago',
 }
 
 function StatCard({
@@ -138,6 +142,44 @@ export default async function AdminCajaPage(props: {
     <div>
       <h1 className="text-2xl font-bold mb-6">Caja</h1>
 
+      {/* Movimiento manual */}
+      <div className="bg-background rounded-lg border p-5 mb-6">
+        <h2 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wide">Movimiento manual de caja</h2>
+        <form action={crearMovimientoCaja} className="flex flex-wrap gap-3 items-end">
+          <div className="flex rounded-md border overflow-hidden text-sm shrink-0">
+            <label className="flex items-center gap-2 px-3 py-2 cursor-pointer has-[:checked]:bg-green-50 has-[:checked]:text-green-800 transition-colors">
+              <input type="radio" name="tipo" value="ingreso" defaultChecked className="sr-only" />
+              <span>+ Ingreso</span>
+            </label>
+            <label className="flex items-center gap-2 px-3 py-2 cursor-pointer border-l has-[:checked]:bg-red-50 has-[:checked]:text-red-800 transition-colors">
+              <input type="radio" name="tipo" value="egreso" className="sr-only" />
+              <span>− Egreso</span>
+            </label>
+          </div>
+
+          <div className="flex-1 min-w-40">
+            <Input name="descripcion" placeholder="Descripción" required />
+          </div>
+
+          <div className="w-36">
+            <Input name="monto" type="number" min="0.01" step="0.01" placeholder="Monto $" required />
+          </div>
+
+          <div>
+            <select
+              name="metodo_pago"
+              defaultValue="efectivo"
+              className="h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </div>
+
+          <SubmitButton loadingText="Registrando...">Registrar</SubmitButton>
+        </form>
+      </div>
+
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -191,6 +233,7 @@ export default async function AdminCajaPage(props: {
                 { value: 'efectivo', label: 'Efectivo' },
                 { value: 'transferencia', label: 'Transferencia' },
                 { value: 'financiada', label: 'Financiada' },
+                { value: 'mercadopago', label: 'MercadoPago' },
               ],
             },
             { key: 'desde', type: 'date', label: 'Desde' },

@@ -8,7 +8,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { returnTo } = await searchParams
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex-1 flex items-center justify-center p-4 py-12">
       <Card className="w-full max-w-md">
         <form action={login}>
           {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
@@ -24,7 +24,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               <Input id="email" name="email" type="email" required />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Contraseña</label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">Contraseña</label>
+                <Link href="/olvide-contrasena" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <Input id="password" name="password" type="password" required />
             </div>
           </CardContent>

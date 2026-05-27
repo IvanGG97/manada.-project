@@ -15,9 +15,7 @@ export async function register(formData: FormData) {
     email,
     password,
     options: {
-      data: {
-        first_name: firstName,
-      }
+      data: { first_name: firstName }
     }
   })
 
@@ -25,10 +23,16 @@ export async function register(formData: FormData) {
     const msg = error.message.toLowerCase().includes('already registered')
       ? 'Ya existe una cuenta con ese email. Iniciá sesión.'
       : 'Error al crear la cuenta. Intentá de nuevo.'
-    redirect(`/register?error=${encodeURIComponent(msg)}`)
+    redirect('/register?error=' + encodeURIComponent(msg))
   }
 
-  // Si no hay sesión, Supabase requiere confirmación de email
+  // Cuando la confirmación de email está habilitada, Supabase no devuelve error
+  // para emails ya registrados — devuelve un usuario con identities vacías.
+  if (data.user && (!data.user.identities || data.user.identities.length === 0)) {
+    redirect('/register?error=' + encodeURIComponent('Ya existe una cuenta con ese email. Iniciá sesión.'))
+  }
+
+  // Sin sesión = confirmación de email pendiente
   if (!data.session) {
     redirect('/login?success=' + encodeURIComponent('Te enviamos un correo de verificación. Revisá tu bandeja de entrada antes de ingresar.'))
   }
