@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { FlashMessage } from "@/components/ui/FlashMessage";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
@@ -39,9 +40,10 @@ export default function RootLayout({
           }}
         />
         <Navbar />
-        <main className="flex-1">
+        <main className="flex-1 pb-16 md:pb-0">
           {children}
         </main>
+        <BottomNav />
         <Suspense>
           <FlashMessage />
         </Suspense>

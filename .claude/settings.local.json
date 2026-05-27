@@ -6,7 +6,8 @@
       "Bash(mkdir -p /home/ivan/Proyectos/ecommerce-manada/src/app/admin/productos/nuevo)",
       "Bash(mkdir -p /home/ivan/Proyectos/ecommerce-manada/src/app/admin/categorias)",
       "Bash(mkdir -p /home/ivan/Proyectos/ecommerce-manada/src/app/admin/ordenes)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm install *)"
     ]
   }
 }

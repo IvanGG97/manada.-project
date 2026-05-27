@@ -68,9 +68,24 @@ export async function Navbar() {
 
   return (
     <nav className="border-b bg-background sticky top-0 z-10 shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2">
 
-        {/* Logo */}
+      {/* ── Mobile: solo logo + theme toggle ── */}
+      <div className="md:hidden h-14 px-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/Logo.jpeg"
+            alt="MaNaDa"
+            width={32}
+            height={32}
+            className="rounded-lg object-cover"
+          />
+          <span className="font-bold text-base tracking-tight">MaNaDa</span>
+        </Link>
+        <ThemeToggle />
+      </div>
+
+      {/* ── Desktop: barra completa ── */}
+      <div className="hidden md:flex h-16 container mx-auto px-4 items-center justify-between gap-2">
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <Image
             src="/Logo.jpeg"
@@ -79,13 +94,11 @@ export async function Navbar() {
             height={38}
             className="rounded-xl object-cover"
           />
-          <span className="text-xl font-bold tracking-tight hidden sm:block">MaNaDa</span>
+          <span className="text-xl font-bold tracking-tight">MaNaDa</span>
         </Link>
 
-        {/* Desktop links + hamburger mobile (NavMenu es ahora un único div) */}
         <NavMenu categories={categories} />
 
-        {/* Acciones del usuario */}
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <Link href={user ? '/profile' : '/login'} className="flex items-center gap-1.5">
@@ -93,13 +106,13 @@ export async function Navbar() {
               <User className="h-5 w-5" />
             </Button>
             {firstName && (
-              <span className="text-sm font-medium hidden sm:block">{firstName}</span>
+              <span className="text-sm font-medium">{firstName}</span>
             )}
           </Link>
           <CartIcon />
         </div>
-
       </div>
+
     </nav>
   )
 }
