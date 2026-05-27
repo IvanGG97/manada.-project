@@ -102,7 +102,7 @@ export async function Navbar() {
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <Link href={user ? '/profile' : '/login'} className="flex items-center gap-1.5">
+          <Link href={user ? '/mi-cuenta/pedidos' : '/login'} className="flex items-center gap-1.5">
             <Button variant="ghost" size="icon" aria-label="Perfil">
               <User className="h-5 w-5" />
             </Button>

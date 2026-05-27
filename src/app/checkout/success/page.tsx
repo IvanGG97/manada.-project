@@ -23,7 +23,7 @@ export default async function CheckoutSuccessPage(props: {
         </p>
       )}
       <div className="flex flex-col gap-3 mt-10">
-        <Link href="/profile">
+        <Link href="/mi-cuenta/pedidos">
           <Button className="w-full">Ver mis pedidos</Button>
         </Link>
         <Link href="/productos">

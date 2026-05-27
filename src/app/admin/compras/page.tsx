@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createCompra } from './actions'
 import { CompraForm } from '@/components/admin/CompraForm'
 import { FilterBar } from '@/components/admin/FilterBar'
+import { Pagination } from '@/components/admin/Pagination'
 import { Suspense } from 'react'
+
+const PER_PAGE = 20
 
 const METODO_LABEL: Record<string, string> = {
   efectivo: 'Efectivo',
@@ -22,28 +25,36 @@ export default async function AdminComprasPage(props: {
   searchParams: Promise<Record<string, string>>
 }) {
   const sp = await props.searchParams
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10))
   const supabase = await createClient()
 
   let comprasQuery = supabase
     .from('compras')
-    .select('*, products(name)')
+    .select('*, products(name)', { count: 'exact' })
     .order('fecha', { ascending: false })
+    .range((page - 1) * PER_PAGE, page * PER_PAGE - 1)
 
   if (sp.desde) comprasQuery = comprasQuery.gte('fecha', sp.desde)
   if (sp.hasta) comprasQuery = comprasQuery.lte('fecha', sp.hasta + 'T23:59:59')
   if (sp.metodo) comprasQuery = comprasQuery.eq('metodo_pago', sp.metodo)
   if (sp.proveedor) comprasQuery = comprasQuery.ilike('proveedor', `%${sp.proveedor}%`)
 
-  const [{ data: compras }, { data: products }] = await Promise.all([
+  const [{ data: compras, count }, { data: products }] = await Promise.all([
     comprasQuery,
-    supabase
-      .from('products')
-      .select('id, name, stock')
-      .order('name'),
+    supabase.from('products').select('id, name, stock').order('name'),
   ])
 
-  const total = compras?.reduce((sum, c) => sum + Number(c.monto), 0) ?? 0
-  const deuda = compras?.filter(c => c.metodo_pago === 'financiada').reduce((sum, c) => sum + Number(c.monto), 0) ?? 0
+  // Total for filtered results (all pages)
+  let totalQuery = supabase.from('compras').select('monto, metodo_pago')
+  if (sp.desde) totalQuery = totalQuery.gte('fecha', sp.desde)
+  if (sp.hasta) totalQuery = totalQuery.lte('fecha', sp.hasta + 'T23:59:59')
+  if (sp.metodo) totalQuery = totalQuery.eq('metodo_pago', sp.metodo)
+  if (sp.proveedor) totalQuery = totalQuery.ilike('proveedor', `%${sp.proveedor}%`)
+  const { data: allCompras } = await totalQuery
+  const total = allCompras?.reduce((sum, c) => sum + Number(c.monto), 0) ?? 0
+  const deuda = allCompras?.filter(c => c.metodo_pago === 'financiada').reduce((sum, c) => sum + Number(c.monto), 0) ?? 0
+
+  const { page: _p, ...filterParams } = sp
 
   return (
     <div>
@@ -125,13 +136,15 @@ export default async function AdminComprasPage(props: {
                 {(!compras || compras.length === 0) && (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                      {Object.keys(sp).length > 0 ? 'No hay compras con esos filtros.' : 'No hay compras registradas todavía.'}
+                      {Object.keys(filterParams).length > 0 ? 'No hay compras con esos filtros.' : 'No hay compras registradas todavía.'}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <Pagination page={page} total={count ?? 0} perPage={PER_PAGE} searchParams={filterParams} />
         </div>
       </div>
     </div>

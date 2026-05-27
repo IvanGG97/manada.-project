@@ -1,10 +1,38 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { ShoppingCart } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 import { AddToCartButton } from '@/components/cart/AddToCartButton'
 import { ProductGallery } from '@/components/ProductGallery'
+
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await props.params
+  const supabase = await createClient()
+  const { data: product } = await supabase
+    .from('products')
+    .select('name, description, image_url, price')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single()
+
+  if (!product) return { title: 'Producto no encontrado' }
+
+  return {
+    title: product.name,
+    description: product.description
+      ? product.description.slice(0, 160)
+      : `${product.name} — $${Number(product.price).toLocaleString('es-AR')}`,
+    openGraph: {
+      title: product.name,
+      description: product.description?.slice(0, 160) ?? '',
+      images: product.image_url ? [{ url: product.image_url, width: 800, height: 800 }] : [],
+    },
+  }
+}
 
 export default async function ProductDetailPage(props: {
   params: Promise<{ slug: string }>
@@ -102,7 +130,7 @@ export default async function ProductDetailPage(props: {
             )}
           </div>
 
-          <div className="mt-auto pt-6 border-t">
+          <div className="mt-auto pt-6 border-t flex gap-3">
             <AddToCartButton product={{
               id: product.id,
               name: product.name,
@@ -110,6 +138,12 @@ export default async function ProductDetailPage(props: {
               image_url: product.image_url,
               stock: product.stock,
             }} />
+            <Link href="/carrito">
+              <Button variant="outline" className="gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Ver carrito
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

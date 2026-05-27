@@ -17,9 +17,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').trim()
+
 export const metadata: Metadata = {
-  title: "Manada - Artículos de Temporada",
-  description: "Descubrí las mejores tendencias en artículos de temporada.",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: 'MaNaDa — Artículos de Temporada',
+    template: '%s | MaNaDa',
+  },
+  description: 'Descubrí las mejores tendencias en artículos de temporada. Compras online seguras con envío a todo el país.',
+  keywords: ['ropa', 'temporada', 'moda', 'indumentaria', 'artículos', 'manada', 'tienda online'],
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    siteName: 'MaNaDa',
+    title: 'MaNaDa — Artículos de Temporada',
+    description: 'Descubrí las mejores tendencias en artículos de temporada.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MaNaDa — Artículos de Temporada',
+    description: 'Descubrí las mejores tendencias en artículos de temporada.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

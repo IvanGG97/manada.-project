@@ -10,7 +10,7 @@ const TABS = [
   { href: '/',          label: 'Inicio',    icon: Home },
   { href: '/productos', label: 'Catálogo',  icon: LayoutGrid },
   { href: '/cart',      label: 'Carrito',   icon: ShoppingCart },
-  { href: '/profile',   label: 'Mi cuenta', icon: User },
+  { href: '/mi-cuenta', label: 'Mi cuenta', icon: User },
 ]
 
 export function BottomNav() {

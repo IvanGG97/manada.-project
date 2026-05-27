@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createVenta } from './actions'
 import { VentaForm } from '@/components/admin/VentaForm'
 import { FilterBar } from '@/components/admin/FilterBar'
+import { Pagination } from '@/components/admin/Pagination'
 import { Suspense } from 'react'
+
+const PER_PAGE = 20
 
 const METODO_LABEL: Record<string, string> = {
   efectivo: 'Efectivo',
@@ -16,24 +19,37 @@ export default async function AdminVentasPage(props: {
   searchParams: Promise<Record<string, string>>
 }) {
   const sp = await props.searchParams
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10))
   const supabase = await createClient()
 
   let ventasQuery = supabase
     .from('ventas_presenciales')
-    .select('*, products(name)')
+    .select('*, products(name)', { count: 'exact' })
     .order('fecha', { ascending: false })
+    .range((page - 1) * PER_PAGE, page * PER_PAGE - 1)
 
   if (sp.desde) ventasQuery = ventasQuery.gte('fecha', sp.desde)
   if (sp.hasta) ventasQuery = ventasQuery.lte('fecha', sp.hasta + 'T23:59:59')
   if (sp.metodo) ventasQuery = ventasQuery.eq('metodo_pago', sp.metodo)
   if (sp.descripcion) ventasQuery = ventasQuery.ilike('descripcion', `%${sp.descripcion}%`)
 
-  const [{ data: ventas }, { data: products }] = await Promise.all([
+  const [{ data: ventas, count }, { data: products }] = await Promise.all([
     ventasQuery,
     supabase.from('products').select('id, name, stock').eq('is_active', true).order('name'),
   ])
 
-  const total = ventas?.reduce((sum, v) => sum + Number(v.monto), 0) ?? 0
+  // Total for filtered results (all pages) — separate query without range
+  let totalQuery = supabase
+    .from('ventas_presenciales')
+    .select('monto')
+  if (sp.desde) totalQuery = totalQuery.gte('fecha', sp.desde)
+  if (sp.hasta) totalQuery = totalQuery.lte('fecha', sp.hasta + 'T23:59:59')
+  if (sp.metodo) totalQuery = totalQuery.eq('metodo_pago', sp.metodo)
+  if (sp.descripcion) totalQuery = totalQuery.ilike('descripcion', `%${sp.descripcion}%`)
+  const { data: allVentas } = await totalQuery
+  const total = allVentas?.reduce((sum, v) => sum + Number(v.monto), 0) ?? 0
+
+  const { page: _p, ...filterParams } = sp
 
   return (
     <div>
@@ -84,7 +100,7 @@ export default async function AdminVentasPage(props: {
                     <td className="p-3">
                       <p className="font-medium">{v.descripcion}</p>
                       {v.products?.name && <p className="text-xs text-blue-600">📦 {v.products.name} × {v.cantidad}</p>}
-                      {v.notas && !v.notas.startsWith('mp_order:') && <p className="text-xs text-muted-foreground">{v.notas}</p>}
+                      {v.notas && !v.notas.startsWith('mp_order:') && !v.notas.startsWith('ajuste_caja') && <p className="text-xs text-muted-foreground">{v.notas}</p>}
                     </td>
                     <td className="p-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -103,13 +119,15 @@ export default async function AdminVentasPage(props: {
                 {(!ventas || ventas.length === 0) && (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                      {Object.keys(sp).length > 0 ? 'No hay ventas con esos filtros.' : 'No hay ventas registradas todavía.'}
+                      {Object.keys(filterParams).length > 0 ? 'No hay ventas con esos filtros.' : 'No hay ventas registradas todavía.'}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <Pagination page={page} total={count ?? 0} perPage={PER_PAGE} searchParams={filterParams} />
         </div>
       </div>
     </div>

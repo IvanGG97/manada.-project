@@ -1,15 +1,34 @@
 import { getProducts, getCategories } from '@/lib/supabase/api'
 import Link from 'next/link'
 import Image from 'next/image'
+import type { Metadata } from 'next'
+import { ProductSearch } from '@/components/ProductSearch'
+import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Catálogo',
+  description: 'Explorá todos nuestros productos de temporada. Envíos a todo el país.',
+  openGraph: {
+    title: 'Catálogo — MaNaDa',
+    description: 'Explorá todos nuestros productos de temporada.',
+  },
+}
 
 export default async function ProductosPage(props: {
-  searchParams?: Promise<{ categoria?: string }>
+  searchParams?: Promise<{ categoria?: string; q?: string }>
 }) {
   const searchParams = await props.searchParams
   const categoriaId = searchParams?.categoria
-  
-  const products = await getProducts({ categoryId: categoriaId })
+  const searchQuery = searchParams?.q?.trim()
+
+  const products = await getProducts({ categoryId: categoriaId, search: searchQuery })
   const categories = await getCategories()
+
+  const pageTitle = searchQuery
+    ? `Resultados para "${searchQuery}"`
+    : categoriaId
+      ? categories.find(c => c.id === categoriaId)?.name || 'Catálogo'
+      : 'Todos los Productos'
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
@@ -18,7 +37,7 @@ export default async function ProductosPage(props: {
       <div className="flex md:hidden gap-2 overflow-x-auto pb-3 mb-6 -mx-4 px-4 scrollbar-none">
         <Link
           href="/productos"
-          className={`shrink-0 text-sm py-1.5 px-4 rounded-full border transition-colors whitespace-nowrap ${!categoriaId ? 'bg-primary text-primary-foreground border-primary font-medium' : 'bg-background border-border hover:bg-muted'}`}
+          className={`shrink-0 text-sm py-1.5 px-4 rounded-full border transition-colors whitespace-nowrap ${!categoriaId && !searchQuery ? 'bg-primary text-primary-foreground border-primary font-medium' : 'bg-background border-border hover:bg-muted'}`}
         >
           Todos
         </Link>
@@ -42,7 +61,7 @@ export default async function ProductosPage(props: {
             <div className="space-y-1 flex flex-col">
               <Link
                 href="/productos"
-                className={`text-sm py-2 px-3 rounded-md transition-colors ${!categoriaId ? 'bg-primary text-primary-foreground font-medium' : 'hover:bg-muted'}`}
+                className={`text-sm py-2 px-3 rounded-md transition-colors ${!categoriaId && !searchQuery ? 'bg-primary text-primary-foreground font-medium' : 'hover:bg-muted'}`}
               >
                 Todos los productos
               </Link>
@@ -61,16 +80,26 @@ export default async function ProductosPage(props: {
 
         {/* Listado de Productos */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold mb-6">
-            {categoriaId
-              ? categories.find(c => c.id === categoriaId)?.name || 'Catálogo'
-              : 'Todos los Productos'
-            }
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">{pageTitle}</h1>
+            <Suspense>
+              <ProductSearch />
+            </Suspense>
+          </div>
 
           {products.length === 0 ? (
             <div className="text-center py-20 bg-muted rounded-lg border border-dashed">
-              <p className="text-muted-foreground text-lg">No se encontraron productos en esta categoría.</p>
+              <p className="text-muted-foreground text-lg">
+                {searchQuery
+                  ? `No encontramos productos para "${searchQuery}".`
+                  : 'No se encontraron productos en esta categoría.'
+                }
+              </p>
+              {searchQuery && (
+                <Link href="/productos" className="mt-4 inline-block text-sm text-primary hover:underline">
+                  Ver todos los productos
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">

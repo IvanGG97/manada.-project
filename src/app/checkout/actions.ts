@@ -59,6 +59,13 @@ export async function createPreference(formData: FormData, cartItems: CartItem[]
   const productsTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const totalAmount = Math.max(0, productsTotal - discountAmount + shippingCost)
 
+  // Cancel any stale pending orders from this user so retries don't accumulate
+  await supabase
+    .from('orders')
+    .update({ status: 'cancelled' })
+    .eq('user_id', user.id)
+    .eq('status', 'pending')
+
   // 2. Create Order in Supabase
   const { data: order, error: orderError } = await supabase
     .from('orders')

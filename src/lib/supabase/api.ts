@@ -6,7 +6,7 @@ export async function getCategories() {
   return data || []
 }
 
-export async function getProducts(options?: { featured?: boolean; categoryId?: string }) {
+export async function getProducts(options?: { featured?: boolean; categoryId?: string; search?: string }) {
   const supabase = await createClient()
   let query = supabase.from('products').select(`
     *,
@@ -21,6 +21,9 @@ export async function getProducts(options?: { featured?: boolean; categoryId?: s
   }
   if (options?.categoryId) {
     query = query.eq('category_id', options.categoryId)
+  }
+  if (options?.search) {
+    query = query.ilike('name', `%${options.search}%`)
   }
 
   const { data } = await query

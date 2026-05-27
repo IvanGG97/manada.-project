@@ -29,8 +29,8 @@ export async function updateOrderStatus(formData: FormData) {
 
   if (error) throw new Error(error.message)
 
-  // Enviar email de envío cuando el estado cambia a "shipped"
-  if (status === 'shipped') {
+  // Send email notification for relevant status changes
+  if (['shipped', 'preparing', 'delivered', 'cancelled'].includes(status)) {
     try {
       const admin = createAdminClient()
       const { data: order } = await admin
@@ -44,28 +44,52 @@ export async function updateOrderStatus(formData: FormData) {
         const email = authUser?.user?.email
         if (email) {
           const { resend, FROM_EMAIL } = await import('@/lib/resend')
-          const { OrderShippedEmail } = await import('@/emails/OrderShipped')
           const { renderToStaticMarkup } = await import('react-dom/server')
           const { createElement } = await import('react')
           const profile = order.profiles as unknown as { first_name: string | null } | null
-          const html = renderToStaticMarkup(
-            createElement(OrderShippedEmail, {
-              orderId: order.id,
-              firstName: profile?.first_name ?? null,
-              shippingAddress: order.shipping_address ?? '',
-              province: order.province ?? '',
+          const firstName = profile?.first_name ?? null
+
+          if (status === 'shipped') {
+            const { OrderShippedEmail } = await import('@/emails/OrderShipped')
+            const html = renderToStaticMarkup(
+              createElement(OrderShippedEmail, {
+                orderId: order.id,
+                firstName,
+                shippingAddress: order.shipping_address ?? '',
+                province: order.province ?? '',
+              })
+            )
+            await resend.emails.send({
+              from: FROM_EMAIL,
+              to: email,
+              subject: `🚚 Tu pedido #${order.id.slice(-8).toUpperCase()} está en camino — MaNaDa`,
+              html,
             })
-          )
-          await resend.emails.send({
-            from: FROM_EMAIL,
-            to: email,
-            subject: `🚚 Tu pedido #${order.id.slice(-8).toUpperCase()} está en camino — MaNaDa`,
-            html,
-          })
+          } else {
+            const { OrderStatusEmail } = await import('@/emails/OrderStatusEmail')
+            const subjects: Record<string, string> = {
+              preparing: `📦 Estamos preparando tu pedido #${order.id.slice(-8).toUpperCase()} — MaNaDa`,
+              delivered: `✅ Tu pedido #${order.id.slice(-8).toUpperCase()} fue entregado — MaNaDa`,
+              cancelled: `❌ Tu pedido #${order.id.slice(-8).toUpperCase()} fue cancelado — MaNaDa`,
+            }
+            const html = renderToStaticMarkup(
+              createElement(OrderStatusEmail, {
+                orderId: order.id,
+                firstName,
+                status: status as 'preparing' | 'delivered' | 'cancelled',
+              })
+            )
+            await resend.emails.send({
+              from: FROM_EMAIL,
+              to: email,
+              subject: subjects[status],
+              html,
+            })
+          }
         }
       }
     } catch (emailError) {
-      console.error('Error sending shipped email:', emailError)
+      console.error('Error sending status email:', emailError)
     }
   }
 

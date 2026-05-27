@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { createPreference, validateDiscount, DiscountResult } from './actions'
 import { ARGENTINA_PROVINCES } from '@/lib/provinces'
 import { Truck, CheckCircle, Tag, X, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 type ShippingZone = {
   id: string
@@ -40,7 +41,11 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
   useEffect(() => { setMounted(true) }, [])
 
   if (!mounted) return null
-  if (items.length === 0) { router.push('/cart'); return null }
+  if (items.length === 0) {
+    toast.info('Tu carrito está vacío. Agregá productos antes de continuar.')
+    router.push('/cart')
+    return null
+  }
 
   const subtotal = getTotal()
   const shippingCost = province ? calcShipping(province, subtotal, zones) : null
