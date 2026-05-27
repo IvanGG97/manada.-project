@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
-import Link from 'next/link'
 import { AddToCartButton } from '@/components/cart/AddToCartButton'
 import { ProductGallery } from '@/components/ProductGallery'
 
@@ -13,12 +12,25 @@ export default async function ProductDetailPage(props: {
   const { slug } = await props.params
   const supabase = await createClient()
 
-  const { data: product } = await supabase
+  let isAdmin = false
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    isAdmin = profile?.role === 'admin'
+  }
+
+  let query = supabase
     .from('products')
     .select('*, categories(name)')
     .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+
+  if (!isAdmin) query = query.eq('is_active', true)
+
+  const { data: product } = await query.single()
 
   if (!product) notFound()
 
@@ -36,6 +48,13 @@ export default async function ProductDetailPage(props: {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {isAdmin && !product.is_active && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          <span className="font-semibold">Vista previa</span>
+          <span className="text-amber-700 dark:text-amber-400">—</span>
+          <span>Este producto está inactivo y no es visible para los clientes.</span>
+        </div>
+      )}
       <div className="mb-6">
         <Link href="/productos" className="text-sm text-muted-foreground hover:text-primary transition-colors">
           &larr; Volver al catálogo

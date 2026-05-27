@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { updateProduct } from '../../actions'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Eye } from 'lucide-react'
 
 export default async function EditarProductoPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
@@ -32,7 +32,18 @@ export default async function EditarProductoPage(props: { params: Promise<{ id: 
         <ChevronLeft className="h-4 w-4" />
         Volver a productos
       </Link>
-      <h1 className="text-2xl font-bold mb-6">Editar producto</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Editar producto</h1>
+        <Link
+          href={`/productos/${product.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded-md px-3 py-1.5 hover:bg-muted"
+        >
+          <Eye className="h-4 w-4" />
+          Vista previa
+        </Link>
+      </div>
       <div className="bg-background rounded-lg border p-6">
         <ProductForm
           action={updateProductWithId}

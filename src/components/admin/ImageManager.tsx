@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X, Upload, ImageIcon, Loader2 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -10,7 +10,7 @@ import imageCompression from 'browser-image-compression'
 const COMPRESSION_OPTIONS = {
   maxSizeMB: 0.4,
   maxWidthOrHeight: 1200,
-  useWebWorker: false, // false = más compatible (funciona en LAN, HTTP, cualquier device)
+  useWebWorker: false,
 }
 
 export interface ExistingImage {
@@ -56,7 +56,7 @@ async function compressFile(file: File): Promise<File> {
   try {
     return await imageCompression(file, COMPRESSION_OPTIONS)
   } catch {
-    return file // si la compresión falla, usar el archivo original
+    return file
   }
 }
 
@@ -75,16 +75,17 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
   const [dragging, setDragging] = useState(false)
   const [compressing, setCompressing] = useState(false)
 
-  function syncInput(files: File[]) {
+  // Sincroniza el input de archivo cada vez que cambian los previews
+  useEffect(() => {
     if (!inputRef.current) return
     try {
       const dt = new DataTransfer()
-      files.forEach((f) => dt.items.add(f))
+      previews.forEach((p) => dt.items.add(p.file))
       inputRef.current.files = dt.files
     } catch {
-      // DataTransfer no soportado; los archivos del input nativo se mantienen
+      // DataTransfer no soportado en este browser
     }
-  }
+  }, [previews])
 
   async function addFiles(incoming: FileList | null) {
     if (!incoming || incoming.length === 0) return
@@ -97,26 +98,16 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
           return { file: compressed, dataUrl }
         })
       )
-      setPreviews((prev) => {
-        const next = [...prev, ...loaded]
-        syncInput(next.map((p) => p.file))
-        return next
-      })
+      setPreviews((prev) => [...prev, ...loaded])
     } catch {
       // error inesperado — no bloquear la UI
     } finally {
       setCompressing(false)
-      // limpiar el input para permitir seleccionar el mismo archivo de nuevo
-      if (inputRef.current) inputRef.current.value = ''
     }
   }
 
   function removePreview(index: number) {
-    setPreviews((prev) => {
-      const next = prev.filter((_, i) => i !== index)
-      syncInput(next.map((p) => p.file))
-      return next
-    })
+    setPreviews((prev) => prev.filter((_, i) => i !== index))
   }
 
   const hasImages = existingImages.length > 0 || previews.length > 0
@@ -124,7 +115,7 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
   return (
     <div className="space-y-3">
 
-      {/* Imágenes guardadas en base de datos */}
+      {/* Imágenes guardadas */}
       {existingImages.length > 0 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
           {existingImages.map((img, i) => (
@@ -143,7 +134,7 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
         </div>
       )}
 
-      {/* Previews de nuevas imágenes (pendientes de subir) */}
+      {/* Previews de imágenes nuevas */}
       {previews.length > 0 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
           {previews.map((p, i) => (
