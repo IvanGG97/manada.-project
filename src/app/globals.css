@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/* ─── Light mode — Manada Pink palette ─── */
+:root {
+  --background:          #FDF0F3;
+  --foreground:          #5A1A30;
+  --primary:             #C45E7A;
+  --primary-foreground:  #FDF0F3;
+  --secondary:           #F6D0DB;
+  --secondary-foreground:#5A1A30;
+  --muted:               #F6D0DB;
+  --muted-foreground:    #8B3352;
+  --accent:              #F6D0DB;
+  --accent-foreground:   #8B3352;
+  --border:              #E8A0B8;
+  --input:               #E8A0B8;
+  --ring:                #C45E7A;
+  --destructive:         #dc2626;
+  --destructive-foreground: #FDF0F3;
+}
+
+/* ─── Dark mode — Midnight Rose palette ─── */
+.dark {
+  --background:          #1A0A10;
+  --foreground:          #FDE8EF;
+  --primary:             #E07898;
+  --primary-foreground:  #1A0A10;
+  --secondary:           #2B1219;
+  --secondary-foreground:#FDE8EF;
+  --muted:               #2B1219;
+  --muted-foreground:    #F4A3BC;
+  --accent:              #2B1219;
+  --accent-foreground:   #F4A3BC;
+  --border:              #5C2438;
+  --input:               #5C2438;
+  --ring:                #E07898;
+  --destructive:         #f87171;
+  --destructive-foreground: #1A0A10;
+}
+
+@theme inline {
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+  --color-destructive:          var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
