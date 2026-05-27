@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
+
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { AddToCartButton } from '@/components/cart/AddToCartButton'
 import { ProductGallery } from '@/components/ProductGallery'

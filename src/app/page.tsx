@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCategories } from '@/lib/supabase/api'
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Truck, CreditCard, Package, Sparkles } from 'lucide-react'

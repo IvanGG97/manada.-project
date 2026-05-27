@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+
+export const dynamic = 'force-dynamic'
 import { logout } from './actions'
 import { Package, MapPin, ShoppingBag, User, LogOut } from 'lucide-react'
 import Link from 'next/link'
