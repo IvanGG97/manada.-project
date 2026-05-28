@@ -1,6 +1,7 @@
 import { register } from './actions'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import Link from 'next/link'
 
@@ -26,7 +27,7 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">Contraseña</label>
-              <Input id="password" name="password" type="password" required minLength={6} />
+              <PasswordInput id="password" name="password" required minLength={6} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

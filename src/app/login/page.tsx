@@ -1,6 +1,7 @@
 import { login } from './actions'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import Link from 'next/link'
 
@@ -30,7 +31,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-              <Input id="password" name="password" type="password" required />
+              <PasswordInput id="password" name="password" required />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
