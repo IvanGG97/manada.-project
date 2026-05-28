@@ -85,34 +85,49 @@ export default async function AdminOrdenesPage(props: {
               const allowedStatuses = getAllowedStatuses(order.status)
               return (
                 <div key={order.id} className="bg-background rounded-lg border overflow-hidden">
-                  <div className="flex flex-wrap items-center gap-4 p-4 border-b bg-muted/30">
-                    <span className="font-mono text-sm font-semibold">#{order.id.slice(-8).toUpperCase()}</span>
-                    <span className="text-sm text-muted-foreground">{order.profiles?.first_name ?? 'Cliente'}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
-                    </span>
-                    <span className="text-sm text-muted-foreground truncate max-w-[200px]">{order.shipping_address}</span>
-                    <span className="ml-auto font-bold text-base">${Number(order.total_amount).toLocaleString('es-AR')}</span>
-                    <Link
-                      href={`/admin/ordenes/${order.id}/imprimir`}
-                      target="_blank"
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors border rounded px-2 py-1"
-                    >
-                      <Printer className="h-3.5 w-3.5" />Imprimir
-                    </Link>
-                    <form action={updateOrderStatus} className="flex items-center gap-2">
-                      <input type="hidden" name="id" value={order.id} />
-                      <select
-                        name="status"
-                        defaultValue={order.status}
-                        className={`text-xs px-2.5 py-1 rounded-full border-0 font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer ${STATUS_COLOR[order.status] ?? 'bg-muted'}`}
+                  {/* Header — mobile: stacked, desktop: horizontal */}
+                  <div className="p-4 border-b bg-muted/30 space-y-2">
+                    {/* Row 1: ID + Amount */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-sm font-semibold">#{order.id.slice(-8).toUpperCase()}</span>
+                      <span className="font-bold text-base shrink-0">${Number(order.total_amount).toLocaleString('es-AR')}</span>
+                    </div>
+                    {/* Row 2: Client · Date · Address */}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                      <span>{order.profiles?.first_name ?? 'Cliente'}</span>
+                      <span>·</span>
+                      <span>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
+                      {order.shipping_address && (
+                        <>
+                          <span>·</span>
+                          <span className="truncate max-w-[180px]">{order.shipping_address}</span>
+                        </>
+                      )}
+                    </div>
+                    {/* Row 3: Status form + print */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <form action={updateOrderStatus} className="flex items-center gap-2 flex-1 min-w-0">
+                        <input type="hidden" name="id" value={order.id} />
+                        <select
+                          name="status"
+                          defaultValue={order.status}
+                          className={`flex-1 min-w-0 text-xs px-2.5 py-1.5 rounded-full border-0 font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer ${STATUS_COLOR[order.status] ?? 'bg-muted'}`}
+                        >
+                          {allowedStatuses.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <SubmitButton size="sm" variant="outline" className="h-7 text-xs px-3 shrink-0">OK</SubmitButton>
+                      </form>
+                      <Link
+                        href={`/admin/ordenes/${order.id}/imprimir`}
+                        target="_blank"
+                        className="flex items-center justify-center h-7 w-7 text-muted-foreground hover:text-foreground transition-colors border rounded shrink-0"
+                        title="Imprimir"
                       >
-                        {allowedStatuses.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                      <SubmitButton size="sm" variant="outline" className="h-7 text-xs px-2">OK</SubmitButton>
-                    </form>
+                        <Printer className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
                   </div>
                   <div className="divide-y">
                     {order.order_items?.map((item: any) => (

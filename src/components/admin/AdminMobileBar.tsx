@@ -143,12 +143,12 @@ export function AdminMobileBar({ lowStockCount = 0 }: { lowStockCount?: number }
             <div className="p-4 border-t space-y-2">
               <div className="flex items-center justify-between">
                 <Link
-                  href="/"
+                  href="/productos"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Ver tienda
+                  Ver catálogo
                 </Link>
                 <ThemeToggle />
               </div>

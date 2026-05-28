@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useId } from 'react'
 import Image from 'next/image'
-import { X, Upload, ImageIcon, Loader2 } from 'lucide-react'
+import { X, ImageIcon, Loader2, Camera } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { deleteProductImage } from '@/app/admin/productos/actions'
 import imageCompression from 'browser-image-compression'
@@ -70,37 +70,41 @@ function readAsDataUrl(file: File): Promise<string> {
 }
 
 export function ImageManager({ productId, existingImages = [] }: ImageManagerProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [previews, setPreviews] = useState<{ file: File; dataUrl: string }[]>([])
+  const galleryInputId = useId()
+  const cameraInputId = useId()
+  const galleryRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const [previews, setPreviews] = useState<{ dataUrl: string }[]>([])
   const [dragging, setDragging] = useState(false)
   const [compressing, setCompressing] = useState(false)
 
-  // Sincroniza el input de archivo cada vez que cambian los previews
-  useEffect(() => {
-    if (!inputRef.current) return
+  // Try to replace the input's files with compressed versions.
+  // If DataTransfer is unavailable (older iOS), the original files stay
+  // in the input — they'll be submitted uncompressed, which is fine.
+  async function tryCompress(inputEl: HTMLInputElement, rawFiles: FileList) {
     try {
+      const compressed = await Promise.all(Array.from(rawFiles).map(compressFile))
       const dt = new DataTransfer()
-      previews.forEach((p) => dt.items.add(p.file))
-      inputRef.current.files = dt.files
+      compressed.forEach((f) => dt.items.add(f))
+      inputEl.files = dt.files
     } catch {
-      // DataTransfer no soportado en este browser
+      // DataTransfer not available — originals stay in input, still submittable
     }
-  }, [previews])
+  }
 
-  async function addFiles(incoming: FileList | null) {
-    if (!incoming || incoming.length === 0) return
+  async function handleFiles(inputEl: HTMLInputElement, rawFiles: FileList | null) {
+    if (!rawFiles || rawFiles.length === 0) return
     setCompressing(true)
     try {
-      const loaded = await Promise.all(
-        Array.from(incoming).map(async (file) => {
-          const compressed = await compressFile(file)
-          const dataUrl = await readAsDataUrl(compressed)
-          return { file: compressed, dataUrl }
-        })
+      // Generate previews from original files (fast, no compression wait)
+      const newPreviews = await Promise.all(
+        Array.from(rawFiles).map(async (f) => ({ dataUrl: await readAsDataUrl(f) }))
       )
-      setPreviews((prev) => [...prev, ...loaded])
+      setPreviews((prev) => [...prev, ...newPreviews])
+      // Compress in-place asynchronously
+      await tryCompress(inputEl, rawFiles)
     } catch {
-      // error inesperado — no bloquear la UI
+      // silently ignore
     } finally {
       setCompressing(false)
     }
@@ -108,6 +112,8 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
 
   function removePreview(index: number) {
     setPreviews((prev) => prev.filter((_, i) => i !== index))
+    // Best-effort: clear file from input if only one was staged
+    // (can't remove individual files from input without DataTransfer)
   }
 
   const hasImages = existingImages.length > 0 || previews.length > 0
@@ -147,7 +153,7 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
               <button
                 type="button"
                 onClick={() => removePreview(i)}
-                className="absolute top-1 right-1 flex items-center justify-center h-5 w-5 rounded-full bg-black/60 text-white transition-opacity hover:bg-black/80 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                className="absolute top-1 right-1 flex items-center justify-center h-5 w-5 rounded-full bg-black/60 text-white hover:bg-black/80 opacity-100 md:opacity-0 md:group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -156,53 +162,82 @@ export function ImageManager({ productId, existingImages = [] }: ImageManagerPro
         </div>
       )}
 
-      {/* Zona de carga */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => !compressing && inputRef.current?.click()}
-        onKeyDown={(e) => e.key === 'Enter' && !compressing && inputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }}
-        className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg p-6 transition-colors ${
-          compressing
-            ? 'border-primary/40 bg-primary/5 cursor-wait'
-            : dragging
-            ? 'border-primary bg-primary/5 cursor-pointer'
-            : 'border-border hover:border-primary/50 hover:bg-muted/40 cursor-pointer'
-        }`}
-      >
-        {compressing ? (
-          <>
-            <Loader2 className="h-7 w-7 text-primary animate-spin" />
-            <p className="text-sm font-medium text-primary">Comprimiendo imágenes...</p>
-          </>
-        ) : (
-          <>
-            {hasImages
-              ? <ImageIcon className="h-6 w-6 text-muted-foreground" />
-              : <Upload className="h-8 w-8 text-muted-foreground" />
-            }
-            <div className="text-center">
-              <p className="text-sm font-medium">
-                {hasImages ? 'Agregar más imágenes' : 'Arrastrá imágenes o hacé click'}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">JPG, PNG, WebP · se comprimen automáticamente</p>
-            </div>
-          </>
-        )}
-        <input
-          ref={inputRef}
-          name="images"
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={(e) => addFiles(e.target.files)}
-        />
+      <div className="flex gap-2">
+        {/* Drop zone / gallery picker — usar <label> para compatibilidad iOS */}
+        <label
+          htmlFor={galleryInputId}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragging(false)
+            if (galleryRef.current) handleFiles(galleryRef.current, e.dataTransfer.files)
+          }}
+          className={`flex flex-1 flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg p-5 transition-colors ${
+            compressing
+              ? 'border-primary/40 bg-primary/5 cursor-wait'
+              : dragging
+              ? 'border-primary bg-primary/5 cursor-pointer'
+              : 'border-border hover:border-primary/50 hover:bg-muted/40 cursor-pointer'
+          }`}
+        >
+          {compressing ? (
+            <>
+              <Loader2 className="h-6 w-6 text-primary animate-spin" />
+              <p className="text-sm font-medium text-primary">Comprimiendo...</p>
+            </>
+          ) : (
+            <>
+              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              <div className="text-center">
+                <p className="text-sm font-medium">
+                  {hasImages ? 'Agregar más' : 'Elegir imágenes'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
+                  JPG, PNG, WebP · se comprimen automáticamente
+                </p>
+              </div>
+            </>
+          )}
+        </label>
+
+        {/* Botón cámara — solo mobile */}
+        <label
+          htmlFor={cameraInputId}
+          className="flex flex-col items-center justify-center gap-1.5 border-2 border-dashed rounded-lg px-4 py-5 border-border hover:border-primary/50 hover:bg-muted/40 cursor-pointer transition-colors sm:hidden shrink-0"
+        >
+          <Camera className="h-6 w-6 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Cámara</span>
+        </label>
       </div>
 
+      {/* Input galería — sr-only en vez de hidden para que iOS pueda interactuar */}
+      <input
+        ref={galleryRef}
+        id={galleryInputId}
+        name="images"
+        type="file"
+        multiple
+        accept="image/*"
+        className="sr-only"
+        onChange={(e) => {
+          if (galleryRef.current) handleFiles(galleryRef.current, e.target.files)
+        }}
+      />
+
+      {/* Input cámara — abre directamente la cámara trasera */}
+      <input
+        ref={cameraRef}
+        id={cameraInputId}
+        name="images"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={(e) => {
+          if (cameraRef.current) handleFiles(cameraRef.current, e.target.files)
+        }}
+      />
     </div>
   )
 }

@@ -28,40 +28,49 @@ export async function Navbar() {
 
   if (isAdmin) {
     return (
-      <nav className="hidden md:block border-b bg-background sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex items-center gap-2.5 shrink-0">
-              <Image
-                src="/Logo.jpeg"
-                alt="MaNaDa"
-                width={36}
-                height={36}
-                className="rounded-lg object-cover"
-              />
-              <span className="text-xl font-bold tracking-tight">MaNaDa</span>
-            </Link>
-            <span className="text-xs font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">
-              Admin
-            </span>
+      <>
+        {/* Desktop: barra admin completa */}
+        <nav className="hidden md:block border-b bg-background sticky top-0 z-10 shadow-sm">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/admin" className="flex items-center gap-2.5 shrink-0">
+                <Image src="/Logo.jpeg" alt="MaNaDa" width={36} height={36} className="rounded-lg object-cover" />
+                <span className="text-xl font-bold tracking-tight">MaNaDa</span>
+              </Link>
+              <span className="text-xs font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Admin
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              {firstName && <span className="text-sm text-muted-foreground">{firstName}</span>}
+              <Link href="/admin">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Panel
+                </Button>
+              </Link>
+              <ThemeToggle />
+              <form action={logout}>
+                <SubmitButton variant="outline" size="sm" loadingText="Saliendo...">Cerrar sesión</SubmitButton>
+              </form>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {firstName && (
-              <span className="text-sm text-muted-foreground">{firstName}</span>
-            )}
-            <Link href="/admin">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <LayoutDashboard className="h-4 w-4" />
-                Panel
-              </Button>
+        </nav>
+
+        {/* Mobile: barra admin simplificada para vista de tienda */}
+        <nav className="md:hidden border-b bg-primary text-primary-foreground sticky top-0 z-10">
+          <div className="h-12 px-4 flex items-center justify-between">
+            <Link href="/admin" className="flex items-center gap-1.5 text-sm font-semibold">
+              <LayoutDashboard className="h-4 w-4" />
+              Volver al admin
             </Link>
-            <ThemeToggle />
-            <form action={logout}>
-              <SubmitButton variant="outline" size="sm" loadingText="Saliendo...">Cerrar sesión</SubmitButton>
-            </form>
+            <div className="flex items-center gap-2">
+              <span className="text-xs opacity-70">Vista tienda</span>
+              <ThemeToggle />
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </>
     )
   }
 

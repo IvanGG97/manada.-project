@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { FlashMessage } from "@/components/ui/FlashMessage";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,17 +40,35 @@ export const metadata: Metadata = {
     title: 'MaNaDa — Artículos de Temporada',
     description: 'Descubrí las mejores tendencias en artículos de temporada.',
   },
+  icons: {
+    icon: '/Logo.jpeg',
+    shortcut: '/Logo.jpeg',
+    apple: '/Logo.jpeg',
+  },
   robots: {
     index: true,
     follow: true,
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    isAdmin = profile?.role === 'admin'
+  }
+
   return (
     <html
       lang="es"
@@ -63,10 +82,10 @@ export default function RootLayout({
           }}
         />
         <Navbar />
-        <main className="flex-1 pb-16 md:pb-0 flex flex-col">
+        <main className={`flex-1 flex flex-col ${isAdmin ? '' : 'pb-16 md:pb-0'}`}>
           {children}
         </main>
-        <BottomNav />
+        {!isAdmin && <BottomNav />}
         <Suspense>
           <FlashMessage />
         </Suspense>
