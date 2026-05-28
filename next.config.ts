@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverActions: {
+    bodySizeLimit: '10mb',
+  },
   allowedDevOrigins: ['192.168.100.8', '192.168.1.69', '*.ngrok-free.app', '*.ngrok.io', '*.loca.lt'],
   images: {
     remotePatterns: [

@@ -1,8 +1,9 @@
 'use client'
 
+import { useRef, useTransition } from 'react'
 import { Input } from '@/components/ui/input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
-import { ImageManager, type ExistingImage } from './ImageManager'
+import { ImageManager, type ExistingImage, type ImageManagerHandle } from './ImageManager'
 
 interface Category { id: string; name: string }
 
@@ -26,8 +27,24 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ action, categories, submitLabel, productId, existingImages, defaultValues }: ProductFormProps) {
+  const imageManagerRef = useRef<ImageManagerHandle>(null)
+  const [isPending, startTransition] = useTransition()
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+
+    // Inject compressed images — these replace any file inputs in the form
+    const files = imageManagerRef.current?.getFiles() ?? []
+    files.forEach((file) => formData.append('images', file))
+
+    startTransition(async () => {
+      await action(formData)
+    })
+  }
+
   return (
-    <form action={action} className="space-y-5 max-w-2xl">
+    <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
       <input type="hidden" name="slug" value={defaultValues?.slug ?? ''} />
 
       <div className="space-y-1.5">
@@ -83,7 +100,7 @@ export function ProductForm({ action, categories, submitLabel, productId, existi
 
       <div className="space-y-1.5">
         <label className="text-sm font-medium">Imágenes</label>
-        <ImageManager productId={productId} existingImages={existingImages} />
+        <ImageManager ref={imageManagerRef} productId={productId} existingImages={existingImages} />
       </div>
 
       <div className="flex gap-6">
@@ -97,7 +114,7 @@ export function ProductForm({ action, categories, submitLabel, productId, existi
         </label>
       </div>
 
-      <SubmitButton loadingText="Guardando...">{submitLabel}</SubmitButton>
+      <SubmitButton isPending={isPending} loadingText="Guardando...">{submitLabel}</SubmitButton>
     </form>
   )
 }

@@ -7,10 +7,12 @@ import type { ComponentProps } from 'react'
 
 interface SubmitButtonProps extends ComponentProps<typeof Button> {
   loadingText?: string
+  isPending?: boolean
 }
 
-export function SubmitButton({ children, loadingText, disabled, ...props }: SubmitButtonProps) {
-  const { pending } = useFormStatus()
+export function SubmitButton({ children, loadingText, disabled, isPending, ...props }: SubmitButtonProps) {
+  const { pending: formPending } = useFormStatus()
+  const pending = isPending ?? formPending
   return (
     <Button type="submit" disabled={pending || disabled} {...props}>
       {pending ? (
