@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useTransition } from 'react'
+import { useRef, useTransition, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { ImageManager, type ExistingImage, type ImageManagerHandle } from './ImageManager'
@@ -29,9 +29,14 @@ interface ProductFormProps {
 export function ProductForm({ action, categories, submitLabel, productId, existingImages, defaultValues }: ProductFormProps) {
   const imageManagerRef = useRef<ImageManagerHandle>(null)
   const [isPending, startTransition] = useTransition()
+  const [isCompressing, setIsCompressing] = useState(false)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    // Block submit if compression is still running
+    if (imageManagerRef.current?.isCompressing()) return
+
     const formData = new FormData(e.currentTarget)
 
     // Inject compressed images — these replace any file inputs in the form
@@ -100,7 +105,12 @@ export function ProductForm({ action, categories, submitLabel, productId, existi
 
       <div className="space-y-1.5">
         <label className="text-sm font-medium">Imágenes</label>
-        <ImageManager ref={imageManagerRef} productId={productId} existingImages={existingImages} />
+        <ImageManager
+          ref={imageManagerRef}
+          productId={productId}
+          existingImages={existingImages}
+          onCompressingChange={setIsCompressing}
+        />
       </div>
 
       <div className="flex gap-6">
@@ -114,7 +124,13 @@ export function ProductForm({ action, categories, submitLabel, productId, existi
         </label>
       </div>
 
-      <SubmitButton isPending={isPending} loadingText="Guardando...">{submitLabel}</SubmitButton>
+      <SubmitButton
+        isPending={isPending || isCompressing}
+        disabled={isPending || isCompressing}
+        loadingText={isCompressing ? 'Comprimiendo imágenes...' : 'Guardando...'}
+      >
+        {submitLabel}
+      </SubmitButton>
     </form>
   )
 }

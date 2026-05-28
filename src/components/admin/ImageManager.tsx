@@ -21,11 +21,13 @@ export interface ExistingImage {
 
 export interface ImageManagerHandle {
   getFiles: () => File[]
+  isCompressing: () => boolean
 }
 
 interface ImageManagerProps {
   productId?: string
   existingImages?: ExistingImage[]
+  onCompressingChange?: (compressing: boolean) => void
 }
 
 function DeleteImageButton({
@@ -57,7 +59,12 @@ function DeleteImageButton({
 }
 
 async function compressFile(file: File): Promise<File> {
-  return imageCompression(file, COMPRESSION_OPTIONS)
+  try {
+    return await imageCompression(file, COMPRESSION_OPTIONS)
+  } catch {
+    // Compression failed (e.g. canvas limits on some Android devices) — use original
+    return file
+  }
 }
 
 function readAsDataUrl(file: File): Promise<string> {
@@ -70,7 +77,7 @@ function readAsDataUrl(file: File): Promise<string> {
 }
 
 export const ImageManager = forwardRef<ImageManagerHandle, ImageManagerProps>(
-  function ImageManager({ productId, existingImages = [] }, ref) {
+  function ImageManager({ productId, existingImages = [], onCompressingChange }, ref) {
     const galleryInputId = useId()
     const cameraInputId = useId()
 
@@ -82,11 +89,13 @@ export const ImageManager = forwardRef<ImageManagerHandle, ImageManagerProps>(
 
     useImperativeHandle(ref, () => ({
       getFiles: () => compressedFiles,
+      isCompressing: () => compressing,
     }))
 
     async function addFiles(rawFiles: FileList | null) {
       if (!rawFiles || rawFiles.length === 0) return
       setCompressing(true)
+      onCompressingChange?.(true)
       try {
         const results = await Promise.all(
           Array.from(rawFiles).map(async (file) => {
@@ -101,6 +110,7 @@ export const ImageManager = forwardRef<ImageManagerHandle, ImageManagerProps>(
         console.error('Error compressing image:', err)
       } finally {
         setCompressing(false)
+        onCompressingChange?.(false)
       }
     }
 
