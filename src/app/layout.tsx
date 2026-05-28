@@ -57,16 +57,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
+  let user = null
   let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    isAdmin = profile?.role === 'admin'
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      isAdmin = profile?.role === 'admin'
+    }
+  } catch {
+    // Refresh token inválido — se trata como usuario no autenticado
   }
 
   return (
