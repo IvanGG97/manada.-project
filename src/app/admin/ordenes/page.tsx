@@ -46,7 +46,7 @@ export default async function AdminOrdenesPage(props: {
 
   let query = supabase
     .from('orders')
-    .select('*, profiles(first_name), order_items(id, quantity, unit_price, products(name, image_url))', { count: 'exact' })
+    .select('*, profiles(first_name, last_name, phone), order_items(id, quantity, unit_price, products(name, image_url))', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range((page - 1) * PER_PAGE, page * PER_PAGE - 1)
 
@@ -92,15 +92,23 @@ export default async function AdminOrdenesPage(props: {
                       <span className="font-mono text-sm font-semibold">#{order.id.slice(-8).toUpperCase()}</span>
                       <span className="font-bold text-base shrink-0">${Number(order.total_amount).toLocaleString('es-AR')}</span>
                     </div>
-                    {/* Row 2: Client · Date · Address */}
+                    {/* Row 2: Client · Phone · Date · Address */}
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                      <span>{order.profiles?.first_name ?? 'Cliente'}</span>
+                      <span className="font-medium text-foreground">
+                        {[order.profiles?.first_name, order.profiles?.last_name].filter(Boolean).join(' ') || 'Cliente'}
+                      </span>
+                      {order.profiles?.phone && (
+                        <>
+                          <span>·</span>
+                          <span>{order.profiles.phone}</span>
+                        </>
+                      )}
                       <span>·</span>
                       <span>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
                       {order.shipping_address && (
                         <>
                           <span>·</span>
-                          <span className="truncate max-w-[180px]">{order.shipping_address}</span>
+                          <span className="truncate max-w-[200px]">{order.shipping_address}</span>
                         </>
                       )}
                     </div>

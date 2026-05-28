@@ -26,7 +26,9 @@ function calcShipping(province: string, subtotal: number, zones: ShippingZone[])
   return zone.price
 }
 
-export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
+type ProfileDefaults = { address: string; phone: string }
+
+export function CheckoutForm({ zones, profileDefaults }: { zones: ShippingZone[]; profileDefaults?: ProfileDefaults }) {
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -144,12 +146,26 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">Dirección completa</label>
-                <Input name="shippingAddress" placeholder="Calle, Número, Localidad" required />
+                <Input
+                  name="shippingAddress"
+                  placeholder="Calle, Número, Localidad"
+                  defaultValue={profileDefaults?.address}
+                  required
+                />
+                {profileDefaults?.address && (
+                  <p className="text-xs text-muted-foreground">Podés cambiarla si querés entregar en otro lugar.</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">Teléfono de contacto</label>
-                <Input name="phone" type="tel" placeholder="Código de área + número" required />
+                <Input
+                  name="phone"
+                  type="tel"
+                  placeholder="Código de área + número"
+                  defaultValue={profileDefaults?.phone}
+                  required
+                />
               </div>
 
               {error && <p className="text-destructive text-sm font-medium">{error}</p>}

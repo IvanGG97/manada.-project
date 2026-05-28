@@ -17,16 +17,30 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="firstName" className="text-sm font-medium">Nombre</label>
-              <Input id="firstName" name="firstName" required />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label htmlFor="firstName" className="text-sm font-medium">Nombre *</label>
+                <Input id="firstName" name="firstName" required />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="lastName" className="text-sm font-medium">Apellido *</label>
+                <Input id="lastName" name="lastName" required />
+              </div>
             </div>
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-medium">Email *</label>
               <Input id="email" name="email" type="email" required />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Contraseña</label>
+              <label htmlFor="phone" className="text-sm font-medium">Teléfono</label>
+              <Input id="phone" name="phone" type="tel" placeholder="Ej: 11 1234-5678" />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="address" className="text-sm font-medium">Dirección</label>
+              <Input id="address" name="address" placeholder="Calle, Número, Localidad" />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">Contraseña *</label>
               <PasswordInput id="password" name="password" required minLength={6} />
             </div>
           </CardContent>
