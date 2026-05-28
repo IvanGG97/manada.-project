@@ -131,19 +131,27 @@ export default async function ProductDetailPage(props: {
           </div>
 
           <div className="mt-auto pt-6 border-t flex gap-3">
-            <AddToCartButton product={{
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image_url: product.image_url,
-              stock: product.stock,
-            }} />
-            <Link href="/carrito">
-              <Button variant="outline" className="gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Ver carrito
-              </Button>
-            </Link>
+            {isAdmin ? (
+              <Link href={`/admin/productos/${product.id}/editar`}>
+                <Button variant="outline">Editar producto</Button>
+              </Link>
+            ) : (
+              <>
+                <AddToCartButton product={{
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image_url: product.image_url,
+                  stock: product.stock,
+                }} />
+                <Link href="/cart">
+                  <Button variant="outline" className="gap-2">
+                    <ShoppingCart className="h-4 w-4" />
+                    Ver carrito
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
