@@ -40,11 +40,6 @@ export const metadata: Metadata = {
     title: 'MaNaDa — Artículos de Temporada',
     description: 'Descubrí las mejores tendencias en artículos de temporada.',
   },
-  icons: {
-    icon: '/Logo.jpeg',
-    shortcut: '/Logo.jpeg',
-    apple: '/Logo.jpeg',
-  },
   robots: {
     index: true,
     follow: true,
