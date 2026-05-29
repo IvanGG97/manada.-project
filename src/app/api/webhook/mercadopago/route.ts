@@ -35,8 +35,14 @@ export async function POST(request: NextRequest) {
     }
 
     const newStatus = MP_STATUS_MAP[payment.status ?? ''] ?? 'pending'
-
     const supabase = createAdminClient()
+
+    // Leer el estado actual ANTES de actualizar (para idempotencia)
+    const { data: currentOrder } = await supabase
+      .from('orders')
+      .select('status')
+      .eq('id', orderId)
+      .single()
 
     const { error } = await supabase
       .from('orders')
@@ -52,8 +58,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
     }
 
-    // Registrar en ventas_presenciales cuando el pago es aprobado (idempotente)
-    if (newStatus === 'paid') {
+    // Solo ejecutar efectos secundarios si el estado CAMBIA a paid
+    // (evita descontar stock o registrar ventas si el webhook llega duplicado)
+    const transicionandoAPagado = newStatus === 'paid' && currentOrder?.status !== 'paid'
+
+    if (transicionandoAPagado) {
+      // 1. Descontar stock atómicamente
+      // La función SQL usa GREATEST(0, stock - cantidad) para nunca ir a negativo
+      // y desactiva el producto automáticamente si el stock llega a 0
+      const { error: stockError } = await supabase.rpc('deduct_order_stock', {
+        p_order_id: orderId,
+      })
+      if (stockError) {
+        console.error('Error descontando stock:', stockError)
+      }
+
+      // 2. Registrar en ventas_presenciales (idempotente por notas)
       const ventaRef = `mp_order:${orderId}`
       const { count } = await supabase
         .from('ventas_presenciales')
